@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2B 10과 말하기2 | 빈칸 말하기 연습</title>
+  <!-- 고성능 QR코드 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+
+      /* 왼쪽 상대방 (정우): 노란색 테마 */
+      --jungwoo-theme: #f59e0b;
+      --jungwoo-hover: #d97706;
+      --jungwoo-light: #fef3c7;
+      --jungwoo-bubble: #ffffff;
+
+      /* 오른쪽 학생 (스티븐): 분홍색 테마 */
+      --steven-theme: #e11d48;
+      --steven-hover: #be123c;
+      --steven-light: #ffe4e6;
+      --steven-bubble: #fef01b;
+
+      /* 중앙 채팅방 카카오 블루 배경 */
+      --chat-bg: #a3bad2;
+      --chat-header: #2c3e50;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 14px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .kakao-alert-banner {
+      display: none;
+      background-color: #fef01b;
+      color: #191919;
+      border: 1px solid #e5c300;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .kakao-alert-banner strong { font-weight: 800; }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+    }
+    .badge-wrap { display: flex; align-items: center; gap: 8px; }
+    .badge-unit {
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #fde68a;
+    }
+    .title-main { font-size: 1.15rem; font-weight: 800; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-qr-action {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+    }
+    .btn-qr-action:hover { background: #fde68a; }
+    .device-info { font-size: 0.82rem; font-weight: 600; color: #4338ca; }
+
+    .guide-bar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+    .guide-text { display: flex; align-items: center; gap: 6px; color: #334155; }
+    
+    .btn-turn-flow {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+    .btn-turn-flow:not(:disabled) {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+    .btn-turn-flow:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr 240px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 768px) {
+      .workspace-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .panel-center {
+        grid-column: 1 / -1;
+        order: 3;
+      }
+      .panel-student.student-a { order: 1; }
+      .panel-student.student-b { order: 2; }
+    }
+
+    .panel-student {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .panel-student.student-a.active {
+      border-color: var(--jungwoo-theme);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+    .panel-student.student-b.active {
+      border-color: var(--steven-theme);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2);
+    }
+
+    .panel-student.disabled {
+      opacity: 0.55;
+      filter: grayscale(15%);
+    }
+
+    .student-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .student-a .avatar-circle { background: var(--jungwoo-theme); }
+    .student-b .avatar-circle { background: var(--steven-theme); }
+
+    .student-info { flex: 1; }
+    .name-line { display: flex; justify-content: space-between; align-items: center; }
+    .name-text { font-size: 1.05rem; font-weight: 800; }
+    .turns-count { font-size: 0.72rem; font-weight: 700; color: #d97706; }
+    .student-b .turns-count { color: #e11d48; }
+    .turns-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .wait-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      line-height: 1.4;
+    }
+
+    .btn-speak {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .student-a .btn-speak { background: var(--jungwoo-theme); }
+    .student-a .btn-speak:hover:not(:disabled) { background: var(--jungwoo-hover); }
+
+    .student-b .btn-speak { background: var(--steven-theme); }
+    .student-b .btn-speak:hover:not(:disabled) { background: var(--steven-hover); }
+
+    .btn-speak:disabled {
+      background: #cbd5e1 !important;
+      cursor: not-allowed;
+    }
+    .btn-speak.recognizing {
+      background: #ea580c !important;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    details.manual-input, details.hint-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+    details summary { cursor: pointer; font-weight: 700; color: var(--text-muted); }
+    .manual-box { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    textarea.txt-student {
+      width: 100%;
+      height: 60px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: none;
+    }
+    .btn-confirm {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .hint-content {
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: #fef2f2;
+      border-radius: 6px;
+      color: #991b1b;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      word-break: keep-all;
+    }
+
+    .footer-label {
+      font-size: 0.75rem;
+      text-align: center;
+      color: #94a3b8;
+    }
+
+    .panel-center {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    }
+
+    .chat-header-bar {
+      background: var(--chat-header);
+      color: #ffffff;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+    .chat-progress-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .chat-window {
+      background: var(--chat-bg);
+      height: 520px;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-bubble {
+      max-width: 82%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      scroll-margin-top: 18px;
+    }
+
+    .chat-bubble.speaker-jungwoo { align-self: flex-start; }
+    .chat-bubble.speaker-jungwoo .bubble-box {
+      background: var(--jungwoo-bubble);
+      border-radius: 4px 14px 14px 14px;
+      color: #0f172a;
+    }
+
+    .chat-bubble.speaker-steven { align-self: flex-end; }
+    .chat-bubble.speaker-steven .bubble-box {
+      background: var(--steven-bubble);
+      border-radius: 14px 4px 14px 14px;
+      color: #191919;
+    }
+
+    .bubble-speaker-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 3px;
+    }
+    .speaker-steven .bubble-speaker-tag { text-align: right; }
+
+    .bubble-box {
+      padding: 10px 14px;
+      line-height: 1.48;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      position: relative;
+    }
+
+    .chat-bubble[data-current="true"] .bubble-box {
+      box-shadow: 0 0 0 2.5px #0284c7, 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .bubble-target {
+      font-size: 0.95rem;
+      font-weight: 700;
+      word-break: keep-all;
+    }
+
+    .blank-placeholder {
+      font-style: italic;
+      color: #854d0e;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .blank-answered {
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .feedback-mark {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+    }
+    .speaker-steven .feedback-mark { align-self: flex-end; }
+    .mark-O { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .mark-triangle { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .mark-X { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    .chat-status-bar {
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 18px;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #ffffff;
+      border: 2px solid #0f172a;
+      border-radius: 16px;
+      margin: 8px auto;
+      width: 270px;
+      height: 270px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .qr-container img, .qr-container canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .target-url-text {
+      font-size: 0.8rem;
+      color: #0f172a;
+      font-weight: 700;
+      word-break: break-all;
+      background: #f1f5f9;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .btn-modal-close {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-modal-close:hover { background: #1e293b; }
+
+    details.footer-details {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+    }
+    details.footer-details summary { cursor: pointer; font-weight: 700; }
+    .footer-content { margin-top: 8px; color: var(--text-muted); line-height: 1.5; }
+    .footer-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .btn-footer {
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="kakao-alert-banner" id="kakaoBanner">
+      ⚠️ <strong>카카오톡 안에서는 마이크 인식이 제한됩니다.</strong><br>
+      화면 오른쪽 맨 아래 <strong>점 세 개(⋮)</strong>를 누르고 <strong>[기본 브라우저로 열기]</strong>를 선택해 주세요.
+    </div>
+
+    <!-- 상단 헤더: 2B 10과 말하기2 -->
+    <header class="top-header">
+      <div class="badge-wrap">
+        <span class="badge-unit">2B 10과 말하기2</span>
+        <h1 class="title-main">정우와 스티븐의 대화</h1>
+      </div>
+      <div class="header-right">
+        <button type="button" class="btn-qr-action" id="btnOpenQr">📱 QR코드</button>
+        <div class="device-info">💻 학생 빈칸 말하기 모드</div>
+      </div>
+    </header>
+
+    <!-- 안내 바 -->
+    <div class="guide-bar">
+      <div class="guide-text">
+        <span>💡</span>
+        <span id="guideMsg">스티븐의 말풍선은 비어 있습니다. 정우의 말을 듣고 직접 생각해서 말해보세요!</span>
+      </div>
+      <button type="button" class="btn-turn-flow" id="btnTurnFlow" disabled>다음 차례 ➔</button>
+    </div>
+
+    <!-- 3열 메인 워크스페이스 -->
+    <div class="workspace-grid">
+      <!-- 왼쪽: 정우 -->
+      <section class="panel-student student-a" id="panelJungwoo">
+        <div class="student-profile">
+          <div class="avatar-circle">정</div>
+          <div class="student-info">
+            <div class="name-line">
+              <span class="name-text">정우</span>
+              <span class="turns-count">1·3·5·7·8회</span>
+            </div>
+            <div class="turns-desc">상대방 대사 (원문 표시)</div>
+          </div>
+        </div>
+
+        <div class="wait-box" id="waitJungwoo">상대의 차례를 기다리세요.</div>
+
+        <button type="button" class="btn-speak" id="btnSpeakJungwoo">
+          <span>🔊</span> 정우 대사 듣기
+        </button>
+
+        <button type="button" class="btn-confirm" id="btnConfirmJungwoo" style="padding: 10px; margin-top: -6px;">
+          정우 대사 넘어가기 ➔
+        </button>
+
+        <div class="footer-label">노란색 조작부 · 정우</div>
+      </section>
+
+      <!-- 중앙 채팅창 -->
+      <section class="panel-center">
+        <div class="chat-header-bar">
+          <span>🍲 메뉴 정하기 및 주문</span>
+          <span class="chat-progress-tag" id="progressTag">현재 진행 1 / 9</span>
+        </div>
+
+        <div class="chat-window" id="chatWindow" role="log" aria-live="polite">
+          <!-- 9개 말풍선 -->
+        </div>
+
+        <div class="chat-status-bar" id="chatStatus">
+          <span>🔸</span> 정우가 1번째 대사를 말할 차례예요.
+        </div>
+      </section>
+
+      <!-- 오른쪽: 스티븐 (학생 빈칸) -->
+      <section class="panel-student student-b" id="panelSteven">
+        <div class="student-profile">
+          <div class="avatar-circle">스</div>
+          <div class="student-info">
+            <div class="name-line">
+              <span class="name-text">스티븐 (나)</span>
+              <span class="turns-count">2·4·6·9회</span>
+            </div>
+            <div class="turns-desc">학생 차례: 생각해서 말하기</div>
+          </div>
+        </div>
+
+        <div class="wait-box" id="waitSteven">상대의 차례를 기다리세요.</div>
+
+        <button type="button" class="btn-speak" id="btnMicSteven">
+          <span>🎤</span> 내 대사 말하기
+        </button>
+
+        <details class="manual-input">
+          <summary>직접 입력해서 말하기</summary>
+          <div class="manual-box">
+            <textarea class="txt-student" id="txtSteven" placeholder="생각한 문장을 입력하세요"></textarea>
+            <button type="button" class="btn-confirm" id="btnConfirmSteven">입력 확인</button>
+          </div>
+        </details>
+
+        <!-- 모범 답안 힌트 박스 -->
+        <details class="hint-box">
+          <summary>💡 모범 답안 힌트 보기</summary>
+          <div class="hint-content" id="hintBox">정우의 질문을 잘 듣고 어울리는 대답을 생각해보세요.</div>
+        </details>
+
+        <div class="footer-label">분홍색 조작부 · 스티븐 (빈칸)</div>
+      </section>
+    </div>
+
+    <!-- QR코드 모달 -->
+    <div class="modal" id="qrModal">
+      <div class="modal-content">
+        <h3 style="font-size: 1.2rem; color: #0f172a; margin-bottom: 2px;">📱 스마트폰 카메라로 스캔</h3>
+        <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.4;">
+          화면의 QR 코드를 비추면 학생 스마트폰에서<br><strong>2B 10과 말하기2 페이지</strong>가 즉시 열립니다.
+        </p>
+        <div class="qr-container">
+          <div id="qrcode"></div>
+        </div>
+        <div class="target-url-text" id="targetUrlText"></div>
+        <button type="button" class="btn-modal-close" id="btnCloseQr">닫기</button>
+      </div>
+    </div>
+
+    <!-- 하단 피드백 안내 -->
+    <details class="footer-details">
+      <summary>⚙️ 채점 기준 및 활동 초기화</summary>
+      <div class="footer-content">
+        <p><strong>O</strong>: 목표 문장과 거의 일치함 (85점 이상) / <strong>△</strong>: 핵심 단어 포함 및 일부 보완 필요 (65~84점) / <strong>X</strong>: 다시 생각해서 말하기 (65점 미만)</p>
+        <div class="footer-actions">
+          <button type="button" class="btn-footer" id="btnDownloadJson">기록 다운로드</button>
+          <button type="button" class="btn-footer" id="btnResetAll">활동 초기화</button>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'korean-blank-roleplay.v2.lesson2b10_2';
+
+    // 정우와 스티븐의 9개 대화 세트
+    const DIALOGUE = [
+      { id: 0, speaker: '정우', target: '스티븐, 뭐 먹을래?' },
+      { id: 1, speaker: '스티븐', target: '종류가 많네. 여긴 뭐가 맛있어?' },
+      { id: 2, speaker: '정우', target: '이 식당은 삼계탕이 맛있는데 한번 먹어 볼래?' },
+      { id: 3, speaker: '스티븐', target: '음, 난 닭고기는 좋아하는데 삼계탕은 별로 안 좋아해.' },
+      { id: 4, speaker: '정우', target: '그래? 그럼 감자탕 어때? 안 먹어 봤으면 한번 먹어 봐.' },
+      { id: 5, speaker: '스티븐', target: '좋아. 그럼 감자탕 시키자.' },
+      { id: 6, speaker: '정우', target: '아주머니, 여기 감자탕 2인분 주세요.' },
+      { id: 7, speaker: '정우', target: '맛이 어때? 입에 맞아?' },
+      { id: 8, speaker: '스티븐', target: '응, 조금 매운데 맛있어.' }
+    ];
+
+    let state = {
+      turn: 0,
+      responses: Array(9).fill(''),
+      scores: Array(9).fill(null),
+      drafts: Array(9).fill(''),
+      completed: false
+    };
+
+    let recognition = null;
+    let isRecognizing = false;
+
+    function checkKakaoTalk() {
+      if (/KAKAOTALK/i.test(navigator.userAgent)) {
+        const b = document.getElementById('kakaoBanner');
+        if (b) b.style.display = 'block';
+      }
+    }
+
+    function loadStorage() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed.turn === 'number') {
+            state = Object.assign(state, parsed);
+          }
+        } catch (e) {
+          console.warn('스토리지 복원 실패', e);
+        }
+      }
+    }
+
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      setTimeout(() => {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'ko-KR';
+        u.rate = 0.88;
+        window.speechSynthesis.speak(u);
+      }, 50);
+    }
+
+    function scoreSpeech(target, spoken) {
+      const clean = s => (s || '').replace(/[\s.,?!]/g, '');
+      const t = clean(target);
+      const s = clean(spoken);
+      if (!s) return { score: 0, mark: 'X' };
+      if (t === s) return { score: 100, mark: 'O' };
+
+      let match = 0;
+      for (let i = 0; i < Math.min(t.length, s.length); i++) {
+        if (t[i] === s[i]) match++;
+      }
+      const score = Math.floor((match / Math.max(t.length, s.length)) * 100);
+      let mark = 'X';
+      if (score >= 85) mark = 'O';
+      else if (score >= 65) mark = '△';
+      return { score, mark };
+    }
+
+    function commitResponse(speaker, text) {
+      if (state.completed) return;
+      const currentLine = DIALOGUE[state.turn];
+
+      if (currentLine.speaker !== speaker) {
+        alert('현재 차례가 아닙니다.');
+        return;
+      }
+
+      const trimmed = text.trim();
+      if (!trimmed) {
+        const status = document.getElementById('chatStatus');
+        status.innerHTML = `<span>⚠️</span> 문장을 말하거나 직접 입력해 주세요.`;
+        return;
+      }
+
+      const res = scoreSpeech(currentLine.target, trimmed);
+      state.responses[state.turn] = trimmed;
+      state.scores[state.turn] = res.score;
+      state.drafts[state.turn] = trimmed;
+      saveStorage();
+
+      renderChat();
+      updateControls();
+
+      const status = document.getElementById('chatStatus');
+      status.innerHTML = `<span>✅</span> 스티븐의 말하기가 입력되었습니다! 피드백을 확인하세요.`;
+    }
+
+    function initSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      recognition = new SR();
+      recognition.lang = 'ko-KR';
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        isRecognizing = true;
+        const btn = document.getElementById('btnMicSteven');
+        btn.classList.add('recognizing');
+        btn.innerHTML = `<span>🔴</span> 듣는 중... 말씀하세요`;
+      };
+
+      recognition.onresult = (e) => {
+        let final = '';
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) final += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
+        }
+
+        const txtArea = document.getElementById('txtSteven');
+        txtArea.value = final || interim;
+
+        const status = document.getElementById('chatStatus');
+        status.innerHTML = `<span>🎤</span> 인식 중: ${interim || final}`;
+
+        if (final) {
+          commitResponse('스티븐', final);
+        }
+      };
+
+      recognition.onend = () => {
+        isRecognizing = false;
+        const btn = document.getElementById('btnMicSteven');
+        btn.classList.remove('recognizing');
+        btn.innerHTML = `<span>🎤</span> 내 대사 말하기`;
+      };
+    }
+
+    function scrollToCurrentBubble() {
+      requestAnimationFrame(() => {
+        const chatWindow = document.getElementById('chatWindow');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (state.completed) {
+          chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: reducedMotion ? 'auto' : 'smooth' });
+          return;
+        }
+
+        const currentBubble = chatWindow.querySelector('[data-current="true"]');
+        if (!currentBubble) return;
+
+        const windowRect = chatWindow.getBoundingClientRect();
+        const currentRect = currentBubble.getBoundingClientRect();
+        const targetTop = Math.max(0, chatWindow.scrollTop + currentRect.top - windowRect.top - 18);
+
+        chatWindow.scrollTo({
+          top: targetTop,
+          behavior: reducedMotion ? 'auto' : 'smooth'
+        });
+      });
+    }
+
+    function renderChat() {
+      const win = document.getElementById('chatWindow');
+      win.innerHTML = '';
+
+      DIALOGUE.forEach((item, idx) => {
+        const bubble = document.createElement('div');
+        const isCurrent = !state.completed && idx === state.turn;
+        const isJungwoo = item.speaker === '정우';
+
+        bubble.className = `chat-bubble speaker-${isJungwoo ? 'jungwoo' : 'steven'}`;
+        bubble.setAttribute('data-index', idx);
+        bubble.setAttribute('data-current', isCurrent ? 'true' : 'false');
+
+        let markHtml = '';
+        if (!isJungwoo && state.scores[idx] !== null) {
+          let mark = 'X';
+          let mClass = 'mark-X';
+          if (state.scores[idx] >= 85) { mark = 'O'; mClass = 'mark-O'; }
+          else if (state.scores[idx] >= 65) { mark = '△'; mClass = 'mark-triangle'; }
+          markHtml = `<span class="feedback-mark ${mClass}">${mark} (${state.scores[idx]}점)</span>`;
+        }
+
+        let bubbleContent = '';
+        if (isJungwoo) {
+          bubbleContent = `<div class="bubble-target">${item.target}</div>`;
+        } else {
+          if (state.responses[idx]) {
+            bubbleContent = `<div class="bubble-target blank-answered">${escapeHtml(state.responses[idx])}</div>`;
+          } else {
+            bubbleContent = `<div class="bubble-target blank-placeholder">💭 생각해서 말해 보세요</div>`;
+          }
+        }
+
+        bubble.innerHTML = `
+          <div class="bubble-speaker-tag">${item.speaker}</div>
+          ${markHtml}
+          <div class="bubble-box">
+            ${bubbleContent}
+          </div>
+        `;
+        win.appendChild(bubble);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function updateControls() {
+      const pJungwoo = document.getElementById('panelJungwoo');
+      const pSteven = document.getElementById('panelSteven');
+      const btnSpeakJungwoo = document.getElementById('btnSpeakJungwoo');
+      const btnConfirmJungwoo = document.getElementById('btnConfirmJungwoo');
+      const btnMicSteven = document.getElementById('btnMicSteven');
+      const waitJungwoo = document.getElementById('waitJungwoo');
+      const waitSteven = document.getElementById('waitSteven');
+      const btnTurn = document.getElementById('btnTurnFlow');
+      const status = document.getElementById('chatStatus');
+      const progTag = document.getElementById('progressTag');
+      const hintBox = document.getElementById('hintBox');
+
+      progTag.textContent = state.completed ? `완료 9 / 9` : `현재 진행 ${state.turn + 1} / 9`;
+
+      if (state.completed) {
+        pJungwoo.classList.add('disabled');
+        pSteven.classList.add('disabled');
+        pJungwoo.classList.remove('active');
+        pSteven.classList.remove('active');
+
+        btnSpeakJungwoo.disabled = true;
+        btnConfirmJungwoo.disabled = true;
+        btnMicSteven.disabled = true;
+
+        waitJungwoo.textContent = '연습이 완료되었습니다.';
+        waitSteven.textContent = '모든 대화가 완료되었습니다!';
+
+        btnTurn.disabled = false;
+        btnTurn.textContent = '처음부터 다시';
+        status.innerHTML = `<span>🎉</span> 대화가 끝났습니다! 다시 연습해 보세요.`;
+        return;
+      }
+
+      const currentLine = DIALOGUE[state.turn];
+      const isJungwoo = currentLine.speaker === '정우';
+      const hasResponse = isJungwoo ? true : !!state.responses[state.turn];
+
+      if (isJungwoo) {
+        pJungwoo.classList.remove('disabled');
+        pJungwoo.classList.add('active');
+        pSteven.classList.add('disabled');
+        pSteven.classList.remove('active');
+
+        btnSpeakJungwoo.disabled = false;
+        btnConfirmJungwoo.disabled = false;
+        btnMicSteven.disabled = true;
+
+        waitJungwoo.innerHTML = `정우 대사: <strong>"${currentLine.target}"</strong>`;
+        waitSteven.textContent = '정우의 말을 잘 들어보세요.';
+
+        hintBox.textContent = '정우의 말이 끝나면 스티븐의 차례가 됩니다.';
+      } else {
+        pSteven.classList.remove('disabled');
+        pSteven.classList.add('active');
+        pJungwoo.classList.add('disabled');
+        pJungwoo.classList.remove('active');
+
+        btnSpeakJungwoo.disabled = true;
+        btnConfirmJungwoo.disabled = true;
+        btnMicSteven.disabled = false;
+
+        waitSteven.textContent = '정우의 말에 어울리는 대답을 생각해서 말하세요.';
+        waitJungwoo.textContent = '스티븐의 대답을 기다리고 있습니다.';
+
+        document.getElementById('txtSteven').value = state.drafts[state.turn] || '';
+        hintBox.textContent = `모범 대사: "${currentLine.target}"`;
+      }
+
+      btnTurn.disabled = !hasResponse;
+      if (state.turn === 8) {
+        btnTurn.textContent = '대화 마치기';
+      } else {
+        btnTurn.textContent = '다음 차례 ➔';
+      }
+
+      if (!state.responses[state.turn] && !isJungwoo) {
+        status.innerHTML = `<span>🔸</span> 스티븐(학생)이 직접 생각해서 말할 차례예요.`;
+      } else if (isJungwoo) {
+        status.innerHTML = `<span>🔸</span> 정우 대사 차례입니다. [정우 대사 듣기]를 눌러보세요.`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkKakaoTalk();
+      loadStorage();
+      initSpeechRecognition();
+
+      renderChat();
+      updateControls();
+      scrollToCurrentBubble();
+
+      document.getElementById('btnSpeakJungwoo').onclick = () => {
+        const currentLine = DIALOGUE[state.turn];
+        if (currentLine.speaker === '정우') {
+          speakText(currentLine.target);
+        }
+      };
+
+      document.getElementById('btnConfirmJungwoo').onclick = () => {
+        if (DIALOGUE[state.turn].speaker === '정우') {
+          state.turn++;
+          saveStorage();
+          renderChat();
+          updateControls();
+          scrollToCurrentBubble();
+        }
+      };
+
+      document.getElementById('btnMicSteven').onclick = () => {
+        if (recognition && !isRecognizing) recognition.start();
+      };
+
+      document.getElementById('btnConfirmSteven').onclick = () => {
+        commitResponse('스티븐', document.getElementById('txtSteven').value);
+      };
+
+      document.getElementById('btnTurnFlow').onclick = () => {
+        if (state.completed) {
+          state = {
+            turn: 0,
+            responses: Array(9).fill(''),
+            scores: Array(9).fill(null),
+            drafts: Array(9).fill(''),
+            completed: false
+          };
+          saveStorage();
+          renderChat();
+          updateControls();
+          scrollToCurrentBubble();
+          return;
+        }
+
+        if (state.turn < 8) {
+          state.turn++;
+          saveStorage();
+          renderChat();
+          updateControls();
+          scrollToCurrentBubble();
+        } else {
+          state.completed = true;
+          saveStorage();
+          renderChat();
+          updateControls();
+          scrollToCurrentBubble();
+        }
+      };
+
+      const qrModal = document.getElementById('qrModal');
+      const qrBox = document.getElementById('qrcode');
+      const targetUrlText = document.getElementById('targetUrlText');
+
+      document.getElementById('btnOpenQr').onclick = () => {
+        qrBox.innerHTML = '';
+        const targetUrl = window.location.origin.startsWith('http') 
+          ? window.location.href.split('#')[0] 
+          : 'https://thigp3.github.io/2A-2B/';
+
+        targetUrlText.textContent = targetUrl;
+
+        new QRCode(qrBox, {
+          text: targetUrl,
+          width: 230,
+          height: 230,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        qrModal.style.display = 'flex';
+      };
+
+      document.getElementById('btnCloseQr').onclick = () => {
+        qrModal.style.display = 'none';
+      };
+
+      document.getElementById('btnResetAll').onclick = () => {
+        if (confirm('모든 연습 기록을 초기화하시겠습니까?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      };
+    });
+  </script>
+</body>
+</html>
