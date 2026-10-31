@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2B 14과 말하기2 | 한국과 일본의 예절 문화</title>
+  <style>
+    :root {
+      --bg-page: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --steven-theme: #0284c7;
+      --steven-hover: #0369a1;
+      --steven-bubble: #ffffff;
+      --mariko-theme: #e11d48;
+      --mariko-hover: #be123c;
+      --mariko-bubble: #fef01b;
+      --chat-bg: #a3bad2;
+      --chat-header: #1e293b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 14px;
+      overflow-x: hidden;
+    }
+    .app-container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+    }
+    .badge-wrap { display: flex; align-items: center; gap: 8px; }
+    .badge-unit {
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid #fde68a;
+    }
+    .title-main { font-size: 1.15rem; font-weight: 800; }
+    .btn-qr-action {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .scenario-selector {
+      display: flex;
+      gap: 8px;
+      background: #ffffff;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+    }
+    .btn-scenario {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-scenario.active {
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .guide-bar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .btn-turn-flow {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-turn-flow:disabled {
+      background: #cbd5e1;
+      border-color: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr 260px;
+      gap: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 820px) {
+      .workspace-grid { grid-template-columns: 1fr 1fr; }
+      .panel-center { grid-column: 1 / -1; order: 3; }
+    }
+    .panel-student {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+    .panel-student.student-a.active {
+      border-color: var(--steven-theme);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+    }
+    .panel-student.student-b.active {
+      border-color: var(--mariko-theme);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2);
+    }
+    .panel-student.disabled {
+      opacity: 0.45;
+    }
+    .student-profile { display: flex; align-items: center; gap: 10px; }
+    .avatar-circle {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.15rem; color: #fff;
+    }
+    .student-a .avatar-circle { background: var(--steven-theme); }
+    .student-b .avatar-circle { background: var(--mariko-theme); }
+    .name-text { font-size: 1.05rem; font-weight: 800; }
+    .turns-count { font-size: 0.72rem; font-weight: 700; color: #0284c7; }
+    .student-b .turns-count { color: #e11d48; }
+
+    .wait-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.88rem;
+      min-height: 76px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+    .wait-box strong { color: #0f172a; margin-top: 4px; }
+
+    .btn-action-group { display: flex; flex-direction: column; gap: 8px; }
+    .btn-speak {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .student-a .btn-speak { background: var(--steven-theme); }
+    .student-a .btn-speak:hover:not(:disabled) { background: var(--steven-hover); }
+
+    .student-b .btn-speak { background: var(--mariko-theme); }
+    .student-b .btn-speak:hover:not(:disabled) { background: var(--mariko-hover); }
+
+    .btn-listen {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-speak:disabled, .btn-listen:disabled {
+      background: #cbd5e1 !important;
+      border-color: #cbd5e1 !important;
+      cursor: not-allowed;
+      color: #94a3b8;
+    }
+    .btn-speak.recognizing {
+      background: #ea580c !important;
+    }
+
+    details.manual-input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+    details summary { cursor: pointer; font-weight: 700; color: var(--text-muted); }
+    .manual-box { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+    textarea.txt-student {
+      width: 100%;
+      height: 52px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 0.82rem;
+      resize: none;
+    }
+    .btn-confirm {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .panel-center {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    }
+    .chat-header-bar {
+      background: var(--chat-header);
+      color: #ffffff;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+    .chat-progress-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+    .chat-window {
+      background: var(--chat-bg);
+      height: 520px;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-bubble { max-width: 82%; display: flex; flex-direction: column; }
+    .chat-bubble.speaker-steven { align-self: flex-start; }
+    .chat-bubble.speaker-steven .bubble-box {
+      background: var(--steven-bubble);
+      border-radius: 4px 14px 14px 14px;
+      color: #0f172a;
+    }
+    .chat-bubble.speaker-mariko { align-self: flex-end; }
+    .chat-bubble.speaker-mariko .bubble-box {
+      background: var(--mariko-bubble);
+      border-radius: 14px 4px 14px 14px;
+      color: #191919;
+    }
+    .bubble-speaker-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 3px;
+    }
+    .speaker-mariko .bubble-speaker-tag { text-align: right; }
+    .bubble-box {
+      padding: 10px 14px;
+      line-height: 1.48;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    .chat-bubble[data-current="true"] .bubble-box {
+      box-shadow: 0 0 0 2.5px #0284c7, 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .bubble-target { font-size: 0.95rem; font-weight: 700; word-break: keep-all; }
+    .bubble-user-text {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      padding-top: 5px;
+      border-top: 1px dashed rgba(0, 0, 0, 0.18);
+      color: #334155;
+    }
+    .feedback-mark {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+    }
+    .speaker-mariko .feedback-mark { align-self: flex-end; }
+    .mark-O { background: #dcfce7; color: #15803d; }
+    .mark-triangle { background: #fef3c7; color: #b45309; }
+    .mark-X { background: #fee2e2; color: #b91c1c; }
+    .chat-status-bar {
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #ffffff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 18px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      background: #ffffff;
+      border: 2px solid #0f172a;
+      border-radius: 14px;
+      margin: 12px auto;
+      width: 240px;
+      height: 240px;
+    }
+    .qr-container img { width: 100%; height: 100%; object-fit: contain; }
+    .btn-modal-close {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="top-header">
+      <div class="badge-wrap">
+        <span class="badge-unit">2B 14과 말하기2</span>
+        <h1 class="title-main">스티븐과 마리코의 대화 (2인 롤플레잉)</h1>
+      </div>
+      <div class="header-right">
+        <button type="button" class="btn-qr-action" id="btnOpenQr">📱 QR코드</button>
+      </div>
+    </header>
+
+    <div class="scenario-selector">
+      <button type="button" class="btn-scenario active" id="btnScen1">1) 다리를 꼬고 앉다 / 술 마시다 (기본)</button>
+      <button type="button" class="btn-scenario" id="btnScen2">2) 담배를 피우다 / 밥을 먹다 (치환)</button>
+    </div>
+
+    <div class="guide-bar">
+      <span>💡 두 학생이 번갈아 가며 대사를 말합니다. 발화 후 [다음 차례 ➔]를 누르세요.</span>
+      <button type="button" class="btn-turn-flow" id="btnTurnFlow" disabled>다음 차례 ➔</button>
+    </div>
+
+    <div class="workspace-grid">
+      <!-- 왼쪽: 스티븐 -->
+      <section class="panel-student student-a" id="panelSteven">
+        <div class="student-profile">
+          <div class="avatar-circle">스</div>
+          <div>
+            <div class="name-text">학생 A (스티븐)</div>
+            <div class="turns-count">1·3·5·7·9회</div>
+          </div>
+        </div>
+
+        <div class="wait-box" id="waitSteven">대기 중...</div>
+
+        <div class="btn-action-group">
+          <button type="button" class="btn-speak" id="btnMicSteven">🎤 스티븐 대사 말하기</button>
+          <button type="button" class="btn-listen" id="btnListenSteven">🔊 발음 미리 듣기</button>
+        </div>
+
+        <details class="manual-input">
+          <summary>직접 입력해서 말하기</summary>
+          <div class="manual-box">
+            <textarea class="txt-student" id="txtSteven" placeholder="대사를 입력하세요"></textarea>
+            <button type="button" class="btn-confirm" id="btnConfirmSteven">입력 확인</button>
+          </div>
+        </details>
+      </section>
+
+      <!-- 중앙: 채팅창 -->
+      <section class="panel-center">
+        <div class="chat-header-bar">
+          <span id="chatTitle">🎎 예절 문화 비교 (기본)</span>
+          <span class="chat-progress-tag" id="progressTag">현재 진행 1 / 9</span>
+        </div>
+
+        <div class="chat-window" id="chatWindow"></div>
+        <div class="chat-status-bar" id="chatStatus">대화를 시작하세요.</div>
+      </section>
+
+      <!-- 오른쪽: 마리코 -->
+      <section class="panel-student student-b" id="panelMariko">
+        <div class="student-profile">
+          <div class="avatar-circle">마</div>
+          <div>
+            <div class="name-text">학생 B (마리코)</div>
+            <div class="turns-count">2·4·6·8회</div>
+          </div>
+        </div>
+
+        <div class="wait-box" id="waitMariko">대기 중...</div>
+
+        <div class="btn-action-group">
+          <button type="button" class="btn-speak" id="btnMicMariko">🎤 마리코 대사 말하기</button>
+          <button type="button" class="btn-listen" id="btnListenMariko">🔊 발음 미리 듣기</button>
+        </div>
+
+        <details class="manual-input">
+          <summary>직접 입력해서 말하기</summary>
+          <div class="manual-box">
+            <textarea class="txt-student" id="txtMariko" placeholder="대사를 입력하세요"></textarea>
+            <button type="button" class="btn-confirm" id="btnConfirmMariko">입력 확인</button>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <!-- QR 모달 -->
+    <div class="modal" id="qrModal">
+      <div class="modal-content">
+        <h3 style="font-size:1.15rem; margin-bottom:4px;">📱 스마트폰 카메라로 스캔</h3>
+        <p style="font-size:0.82rem; color:#64748b;">화면의 QR 코드를 비추면 연습 페이지가 열립니다.</p>
+        <div class="qr-container">
+          <img id="qrImg" src="" alt="QR코드" />
+        </div>
+        <button type="button" class="btn-modal-close" id="btnCloseQr">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1) 기본 대화 (다리를 꼬고 앉다 / 술을 마시다)
+    var SCENARIO_1 = [
+      { speaker: '스티븐', target: '한국은 어른에 대한 예절이 좀 복잡한 것 같아요.' },
+      { speaker: '마리코', target: '맞아요. 어른 앞에서 하면 안 되는 것이 많지요?' },
+      { speaker: '스티븐', target: '네, 오늘 할아버지 앞에서 다리를 꼬고 앉아서 야단맞았어요.' },
+      { speaker: '마리코', target: '한국에서는 어른 앞에서 다리를 꼬고 앉으면 안 돼요.' },
+      { speaker: '스티븐', target: '저도 아는데 우리 나라에서는 그렇게 해도 괜찮아서 자꾸 잊어버려요. 일본 문화는 한국 문화와 많이 비슷하지요?' },
+      { speaker: '마리코', target: '비슷한 것도 있지만 다른 것도 많아요.' },
+      { speaker: '스티븐', target: '뭐가 다른데요?' },
+      { speaker: '마리코', target: '한국에서는 어른 앞에서 술을 마실 때 고개를 돌리고 마셔야 하지만 일본에서는 그냥 마셔도 돼요.' },
+      { speaker: '스티븐', target: '그래요? 가까운 나라지만 문화는 다르네요.' }
+    ];
+
+    // 2) 치환 대화 (담배를 피우다 / 밥을 먹다)
+    var SCENARIO_2 = [
+      { speaker: '스티븐', target: '한국은 어른에 대한 예절이 좀 복잡한 것 같아요.' },
+      { speaker: '마리코', target: '맞아요. 어른 앞에서 하면 안 되는 것이 많지요?' },
+      { speaker: '스티븐', target: '네, 오늘 할아버지 앞에서 담배를 피워서 야단맞았어요.' },
+      { speaker: '마리코', target: '한국에서는 어른 앞에서 담배를 피우면 안 돼요.' },
+      { speaker: '스티븐', target: '저도 아는데 우리 나라에서는 그렇게 해도 괜찮아서 자꾸 잊어버려요. 일본 문화는 한국 문화와 많이 비슷하지요?' },
+      { speaker: '마리코', target: '비슷한 것도 있지만 다른 것도 많아요.' },
+      { speaker: '스티븐', target: '뭐가 다른데요?' },
+      { speaker: '마리코', target: '한국에서는 밥을 먹을 때 밥그릇을 놓고 먹어야 하지만 일본에서는 그릇을 들고 먹어야 돼요.' },
+      { speaker: '스티븐', target: '그래요? 가까운 나라지만 문화는 다르네요.' }
+    ];
+
+    var currentDialogue = SCENARIO_1;
+    var turn = 0;
+    var responses = ['', '', '', '', '', '', '', '', ''];
+    var scores = [null, null, null, null, null, null, null, null, null];
+    var completed = false;
+    var recognition = null;
+    var activeRole = null;
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ko-KR';
+      u.rate = 0.88;
+      window.speechSynthesis.speak(u);
+    }
+
+    function initRecognition() {
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      try {
+        recognition = new SR();
+        recognition.lang = 'ko-KR';
+        recognition.onstart = function() {
+          var btn = activeRole === '스티븐' ? document.getElementById('btnMicSteven') : document.getElementById('btnMicMariko');
+          if (btn) {
+            btn.classList.add('recognizing');
+            btn.textContent = '🔴 듣는 중... 말씀하세요';
+          }
+        };
+        recognition.onresult = function(e) {
+          var text = e.results[0][0].transcript;
+          if (text && activeRole) {
+            commitSpoken(activeRole, text);
+          }
+        };
+        recognition.onend = function() {
+          var b1 = document.getElementById('btnMicSteven');
+          var b2 = document.getElementById('btnMicMariko');
+          if (b1) { b1.classList.remove('recognizing'); b1.textContent = '🎤 스티븐 대사 말하기'; }
+          if (b2) { b2.classList.remove('recognizing'); b2.textContent = '🎤 마리코 대사 말하기'; }
+          activeRole = null;
+        };
+      } catch(e) {
+        console.warn('음성인식 미지원');
+      }
+    }
+
+    function commitSpoken(speaker, text) {
+      if (completed) return;
+      var cur = currentDialogue[turn];
+      if (cur.speaker !== speaker) return;
+
+      var clean = function(s) { return (s || '').replace(/[\s.,?!]/g, ''); };
+      var t = clean(cur.target);
+      var s = clean(text);
+
+      var match = 0;
+      for (var i = 0; i < Math.min(t.length, s.length); i++) {
+        if (t[i] === s[i]) match++;
+      }
+      var score = Math.floor((match / Math.max(t.length, s.length)) * 100);
+
+      responses[turn] = text;
+      scores[turn] = score;
+
+      renderChat();
+      updateControls();
+    }
+
+    function renderChat() {
+      var win = document.getElementById('chatWindow');
+      if (!win) return;
+      win.innerHTML = '';
+
+      for (var idx = 0; idx < currentDialogue.length; idx++) {
+        var item = currentDialogue[idx];
+        var isSteven = item.speaker === '스티븐';
+        var isCurrent = !completed && idx === turn;
+
+        var bubble = document.createElement('div');
+        bubble.className = 'chat-bubble speaker-' + (isSteven ? 'steven' : 'mariko');
+        bubble.setAttribute('data-current', isCurrent ? 'true' : 'false');
+
+        var markHtml = '';
+        if (scores[idx] !== null) {
+          var mChar = 'X';
+          var mCls = 'mark-X';
+          if (scores[idx] >= 85) { mChar = 'O'; mCls = 'mark-O'; }
+          else if (scores[idx] >= 65) { mChar = '△'; mCls = 'mark-triangle'; }
+          markHtml = '<span class="feedback-mark ' + mCls + '">' + mChar + ' (' + scores[idx] + '점)</span>';
+        }
+
+        var userHtml = responses[idx] ? '<div class="bubble-user-text">🗣️ 발화: ' + responses[idx] + '</div>' : '';
+
+        bubble.innerHTML = 
+          '<div class="bubble-speaker-tag">' + item.speaker + '</div>' +
+          markHtml +
+          '<div class="bubble-box">' +
+            '<div class="bubble-target">' + item.target + '</div>' +
+            userHtml +
+          '</div>';
+
+        win.appendChild(bubble);
+      }
+    }
+
+    function updateControls() {
+      var pSteven = document.getElementById('panelSteven');
+      var pMariko = document.getElementById('panelMariko');
+      var btnMicSteven = document.getElementById('btnMicSteven');
+      var btnListenSteven = document.getElementById('btnListenSteven');
+      var btnMicMariko = document.getElementById('btnMicMariko');
+      var btnListenMariko = document.getElementById('btnListenMariko');
+      var waitSteven = document.getElementById('waitSteven');
+      var waitMariko = document.getElementById('waitMariko');
+      var btnTurn = document.getElementById('btnTurnFlow');
+      var prog = document.getElementById('progressTag');
+      var status = document.getElementById('chatStatus');
+
+      prog.textContent = '현재 진행 ' + (turn + 1) + ' / 9';
+
+      if (completed) {
+        pSteven.className = 'panel-student student-a disabled';
+        pMariko.className = 'panel-student student-b disabled';
+        btnMicSteven.disabled = true;
+        btnListenSteven.disabled = true;
+        btnMicMariko.disabled = true;
+        btnListenMariko.disabled = true;
+        waitSteven.textContent = '모든 대화가 완료되었습니다.';
+        waitMariko.textContent = '모든 대화가 완료되었습니다!';
+        btnTurn.textContent = '처음부터 다시';
+        btnTurn.disabled = false;
+        status.textContent = '🎉 9개 대화를 모두 마쳤습니다! 훌륭합니다.';
+        return;
+      }
+
+      var current = currentDialogue[turn];
+      var isSteven = current.speaker === '스티븐';
+
+      pSteven.className = 'panel-student student-a ' + (isSteven ? 'active' : 'disabled');
+      pMariko.className = 'panel-student student-b ' + (!isSteven ? 'active' : 'disabled');
+
+      btnMicSteven.disabled = !isSteven;
+      btnListenSteven.disabled = !isSteven;
+      btnMicMariko.disabled = isSteven;
+      btnListenMariko.disabled = isSteven;
+
+      if (isSteven) {
+        waitSteven.innerHTML = '말할 대사:<br><strong>"' + current.target + '"</strong>';
+        waitMariko.textContent = '스티븐의 말을 듣고 차례를 기다리세요.';
+      } else {
+        waitMariko.innerHTML = '말할 대사:<br><strong>"' + current.target + '"</strong>';
+        waitSteven.textContent = '마리코의 대답을 기다리고 있습니다.';
+      }
+
+      btnTurn.disabled = !responses[turn];
+      btnTurn.textContent = (turn === 8) ? '대화 마치기' : '다음 차례 ➔';
+      status.textContent = current.speaker + ' 차례입니다. [대사 말하기] 또는 직접 입력해 보세요.';
+    }
+
+    function resetAll() {
+      turn = 0;
+      responses = ['', '', '', '', '', '', '', '', ''];
+      scores = [null, null, null, null, null, null, null, null, null];
+      completed = false;
+      renderChat();
+      updateControls();
+    }
+
+    function setupEvents() {
+      initRecognition();
+      renderChat();
+      updateControls();
+
+      document.getElementById('btnScen1').onclick = function() {
+        currentDialogue = SCENARIO_1;
+        document.getElementById('btnScen1').className = 'btn-scenario active';
+        document.getElementById('btnScen2').className = 'btn-scenario';
+        document.getElementById('chatTitle').textContent = '🎎 예절 문화 비교 (기본)';
+        resetAll();
+      };
+
+      document.getElementById('btnScen2').onclick = function() {
+        currentDialogue = SCENARIO_2;
+        document.getElementById('btnScen2').className = 'btn-scenario active';
+        document.getElementById('btnScen1').className = 'btn-scenario';
+        document.getElementById('chatTitle').textContent = '🎎 예절 문화 비교 (치환)';
+        resetAll();
+      };
+
+      document.getElementById('btnListenSteven').onclick = function() {
+        if (currentDialogue[turn].speaker === '스티븐') speakText(currentDialogue[turn].target);
+      };
+      document.getElementById('btnListenMariko').onclick = function() {
+        if (currentDialogue[turn].speaker === '마리코') speakText(currentDialogue[turn].target);
+      };
+
+      document.getElementById('btnMicSteven').onclick = function() {
+        if (recognition) { activeRole = '스티븐'; recognition.start(); }
+      };
+      document.getElementById('btnMicMariko').onclick = function() {
+        if (recognition) { activeRole = '마리코'; recognition.start(); }
+      };
+
+      document.getElementById('btnConfirmSteven').onclick = function() {
+        var txt = document.getElementById('txtSteven').value;
+        commitSpoken('스티븐', txt);
+      };
+      document.getElementById('btnConfirmMariko').onclick = function() {
+        var txt = document.getElementById('txtMariko').value;
+        commitSpoken('마리코', txt);
+      };
+
+      document.getElementById('btnTurnFlow').onclick = function() {
+        if (completed) { resetAll(); return; }
+        if (turn < 8) { turn++; } else { completed = true; }
+        renderChat();
+        updateControls();
+      };
+
+      var qrModal = document.getElementById('qrModal');
+      document.getElementById('btnOpenQr').onclick = function() {
+        var currentUrl = encodeURIComponent(window.location.href);
+        var qrImg = document.getElementById('qrImg');
+        qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + currentUrl;
+        qrModal.style.display = 'flex';
+      };
+      document.getElementById('btnCloseQr').onclick = function() {
+        qrModal.style.display = 'none';
+      };
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupEvents);
+    } else {
+      setupEvents();
+    }
+  </script>
+</body>
+</html>
